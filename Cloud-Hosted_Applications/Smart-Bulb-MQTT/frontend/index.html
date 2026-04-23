@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Bulb Controller UI</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+
+<div class="app">
+  <h1>Smart Bulb Controller</h1>
+  <p class="subtitle">Real-time IoT Shadow View + Manual Control</p>
+
+  <section class="card">
+    <h2>Bulb State</h2>
+    <div class="row"><span>Lights:</span><span id="lights">--</span></div>
+    <div class="row"><span>Light Off Timestamp:</span><span id="offTs">--</span></div>
+    <div class="row"><span>Delta (Pending Cmd):</span><span id="delta">None</span></div>
+    <button id="refresh">Refresh (MQTT is Auto)</button>
+  </section>
+
+  <section class="card">
+    <h2>Manual Override</h2>
+    <button id="onBtn">Turn ON</button>
+    <button id="offBtn">Turn OFF</button>
+  </section>
+
+  <section class="card">
+    <h2>Brightness Data</h2>
+    <div class="row"><span>Current Sensor Value:</span><b id="brightness_val">0</b></div>
+    <hr>
+    <div class="row">
+      <span>Simulate Brightness (0–1000):</span>
+      <input id="brightnessInput" type="number" min="0" max="1000" style="width:120px;">
+    </div>
+    <button id="sendBrightnessBtn">Send Brightness</button>
+  </section>
+
+  <section class="card">
+    <h2>Alert Test</h2>
+    <button id="runAlertTestBtn">Run 30-second Alert Test</button>
+  </section>
+
+  <section class="card">
+    <h2>Duration Info</h2>
+    <div class="row"><span>Seconds since last OFF:</span><span id="secs">--</span></div>
+    <div class="row"><span>Last Alert:</span><span id="alert">None</span></div>
+    <button id="refreshDuration">Refresh</button>
+  </section>
+
+  <section class="card">
+    <h2>Debug Log</h2>
+    <pre id="log" style="background: #eee; padding: 10px; max-height: 200px; overflow-y: auto;"></pre>
+  </section>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

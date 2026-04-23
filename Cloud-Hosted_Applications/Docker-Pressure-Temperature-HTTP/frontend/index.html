@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IoT Dashboard</title>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #020617, #0f172a);
+      color: #e5e7eb;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: #020617;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 25px rgba(0,0,0,0.5);
+      border: 1px solid #1e293b;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e293b;
+      font-size: 18px;
+      color: #93c5fd;
+    }
+
+    .sensor-row,
+    .valve-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 10px 0;
+      padding: 8px 12px;
+      background: #020617;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+      font-size: 14px;
+    }
+
+    .label {
+      color: #9ca3af;
+    }
+
+    .value {
+      font-weight: bold;
+    }
+
+    .status-ok {
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    .status-failed {
+      color: #ef4444;
+      font-weight: bold;
+    }
+
+    .valve-open {
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    .valve-closed {
+        color: #f97316;
+      font-weight: bold;
+    }
+
+    #alerts {
+      list-style: none;
+      padding-left: 0;
+      margin-top: 10px;
+    }
+
+    #alerts li {
+      background: #450a0a;
+      border: 1px solid #7f1d1d;
+      color: #fecaca;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>IoT Sensor Dashboard</h1>
+
+  <div class="dashboard">
+
+    <div class="card">
+      <h2>Sensors</h2>
+
+      <div class="sensor-row">
+        <span class="label">Temperature</span>
+        <span class="value" id="temperature-value"></span>
+      </div>
+      <div class="sensor-row">
+        <span class="label">Status</span>
+        <span id="temperature-status"></span>
+      </div>
+      <div class="sensor-row">
+        <span class="label">Last Seen</span>
+        <span id="temperature-lastseen"></span>
+      </div>
+
+      <div class="sensor-row">
+        <span class="label">Pressure</span>
+        <span class="value" id="pressure-value"></span>
+      </div>
+      <div class="sensor-row">
+        <span class="label">Status</span>
+        <span id="pressure-status"></span>
+      </div>
+      <div class="sensor-row">
+        <span class="label">Last Seen</span>
+        <span id="pressure-lastseen"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Valves</h2>
+<div class="valve-row">
+        <span class="label">Cool Valve</span>
+        <span id="cool_valve"></span>
+      </div>
+      <div class="valve-row">
+        <span class="label">Heat Valve</span>
+        <span id="heat_valve"></span>
+      </div>
+      <div class="valve-row">
+        <span class="label">Pressure In</span>
+        <span id="pressureIn_valve"></span>
+      </div>
+      <div class="valve-row">
+        <span class="label">Pressure Out</span>
+        <span id="pressureOut_valve"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Alerts</h2>
+      <ul id="alerts"></ul>
+    </div>
+
+  </div>
+
+  <footer>
+    Real-time IoT Monitoring • Local Control Mode
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

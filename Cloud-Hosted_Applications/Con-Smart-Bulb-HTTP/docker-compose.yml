@@ -1,0 +1,52 @@
+services:
+  sb-http-server:
+    build:
+      context: .
+      dockerfile: docker/server/Dockerfile
+    container_name: sb-http-server
+    ports:
+      - "3000:3000"
+    networks:
+      - smart-bulb-network
+
+  sb-http-ui:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    container_name: sb-http-dashboard
+    ports:
+      - "8080:80"
+    networks:
+      - smart-bulb-network
+    depends_on:
+      - sb-http-server
+
+  sb-http-bulb-device:
+    build:
+      context: .
+      dockerfile: docker/bulb/Dockerfile
+    container_name: sb-http-bulb
+    environment:
+      - SERVER=http://sb-http-server:3000
+    networks:
+      - smart-bulb-network
+    depends_on:
+      - sb-http-server
+
+  sb-http-sensor-device:
+    build:
+      context: .
+      dockerfile: docker/sensor/Dockerfile
+    container_name: sb-http-sensor
+    stdin_open: true
+    tty: true
+    environment:
+      - SERVER=http://sb-http-server:3000
+    networks:
+      - smart-bulb-network
+    depends_on:
+      - sb-http-server
+
+networks:
+  smart-bulb-network:
+    driver: bridge

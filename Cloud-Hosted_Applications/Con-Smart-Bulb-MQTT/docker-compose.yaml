@@ -1,0 +1,68 @@
+services:
+  # Local MQTT Broker
+  sb-mqtt-broker:
+    image: eclipse-mosquitto:latest
+    container_name: sb-mqtt-broker
+    ports:
+      - "1883:1883"    # MQTT Port
+      - "9001:9001"    # WebSocket Port (for Browser)
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+    networks:
+      - sb-mqtt-net
+
+  # The Logic Brain
+  sb-mqtt-server:
+    build:
+      context: .
+      dockerfile: docker/server/Dockerfile
+    container_name: sb-mqtt-server
+    environment:
+      - MQTT_BROKER=mqtt://sb-mqtt-broker:1883
+    ports:
+      - "3000:3000"
+    depends_on:
+      - sb-mqtt-broker
+    networks:
+      - sb-mqtt-net
+
+  # The Bulb "Device"
+  sb-mqtt-bulb:
+    build:
+      context: .
+      dockerfile: docker/bulb/Dockerfile
+    container_name: sb-mqtt-bulb
+    environment:
+      - MQTT_BROKER=mqtt://sb-mqtt-broker:1883
+    depends_on:
+      - sb-mqtt-broker
+    networks:
+      - sb-mqtt-net
+
+  # The Sensor "Device"
+  sb-mqtt-sensor:
+    build:
+      context: .
+      dockerfile: docker/sensor/Dockerfile
+    container_name: sb-mqtt-sensor
+    environment:
+      - MQTT_BROKER=mqtt://sb-mqtt-broker:1883
+    depends_on:
+      - sb-mqtt-broker
+    networks:
+      - sb-mqtt-net
+
+  # The Frontend
+  sb-mqtt-ui:
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile
+    container_name: sb-mqtt-dashboard
+    ports:
+      - "8080:80"
+    networks:
+      - sb-mqtt-net
+
+networks:
+  sb-mqtt-net:
+    driver: bridge

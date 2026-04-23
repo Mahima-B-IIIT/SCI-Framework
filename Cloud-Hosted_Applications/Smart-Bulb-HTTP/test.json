@@ -1,0 +1,12 @@
+{
+  "name": "smartbulb-mqtt-demo",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "bulb": "node bulb_client.js"
+  },
+  
+  "dependencies": {
+    "mqtt": "^5.15.0"
+  }
+}

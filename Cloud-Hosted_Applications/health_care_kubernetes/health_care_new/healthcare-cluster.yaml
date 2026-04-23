@@ -1,0 +1,152 @@
+---
+# 1. MongoDB Deployment & Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:latest
+        ports:
+        - containerPort: 27017
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+spec:
+  selector:
+    app: mongodb
+  ports:
+    - port: 27017
+      targetPort: 27017
+
+---
+# 2. Ingestion Server Deployment & Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestion-app
+spec:
+  selector:
+    matchLabels:
+      app: ingestion-app
+  template:
+    metadata:
+      labels:
+        app: ingestion-app
+    spec:
+      containers:
+      - name: ingestion-app
+        image: ingestion-app:latest
+        imagePullPolicy: Never # Forces K8s to use your locally built image
+        ports:
+        - containerPort: 5001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingestion-service
+spec:
+  selector:
+    app: ingestion-app
+  ports:
+    - port: 5001
+      targetPort: 5001
+
+---
+# 3. API Server Deployment & Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-app
+spec:
+  selector:
+    matchLabels:
+      app: api-app
+  template:
+    metadata:
+      labels:
+        app: api-app
+    spec:
+      containers:
+      - name: api-app
+        image: api-app:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-service
+spec:
+  type: LoadBalancer # Exposes this port to your Windows localhost
+  selector:
+    app: api-app
+  ports:
+    - port: 5000
+      targetPort: 5000
+
+---
+# 4. Gateway Deployment (No Service needed, it only sends outbound data)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-app
+spec:
+  selector:
+    matchLabels:
+      app: gateway-app
+  template:
+    metadata:
+      labels:
+        app: gateway-app
+    spec:
+      containers:
+      - name: gateway-app
+        image: gateway-app:latest
+        imagePullPolicy: Never
+
+---
+# 5. Frontend Deployment & Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-app
+spec:
+  selector:
+    matchLabels:
+      app: frontend-app
+  template:
+    metadata:
+      labels:
+        app: frontend-app
+    spec:
+      containers:
+      - name: frontend-app
+        image: frontend-app:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  type: LoadBalancer # Exposes the Nginx dashboard to your browser
+  selector:
+    app: frontend-app
+  ports:
+    - port: 8081
+      targetPort: 80

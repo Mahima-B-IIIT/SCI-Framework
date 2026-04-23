@@ -1,0 +1,73 @@
+services:
+  # 1. Message Broker
+  mqtt:
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1885:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./password.txt:/mosquitto/config/password.txt
+
+  # 2. Database
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  # 3. Backend Ingestion (API)
+  api-server:
+    build: ./server
+    restart: always
+    depends_on:
+      - mqtt
+      - mongodb
+    environment:
+      - MQTT_URL=mqtt://mqtt:1883
+      - MONGO_URL=mongodb://mongodb:27017
+
+  # 4. Controller (Logic)
+  controller:
+    build: ./controller
+    restart: always
+    depends_on:
+      - mqtt
+      - mongodb
+    environment:
+      - MQTT_URL=mqtt://mqtt:1883
+      - MONGO_URL=mongodb://mongodb:27017
+
+  # 5. Temperature Sensor
+  temp-sensor:
+    build: ./sensors
+    command: node temperature.js
+    depends_on:
+      - mqtt
+    environment:
+      - MQTT_URL=mqtt://mqtt:1883
+
+  # 6. Pressure Sensor
+  press-sensor:
+    build: ./sensors
+    command: node pressure.js
+    depends_on:
+      - mqtt
+    environment:
+      - MQTT_URL=mqtt://mqtt:1883
+
+  # 7. Frontend (Nginx)
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    # We map the nginx.conf from the root into the build if needed, 
+    # but since it's in the root, let's ensure the Dockerfile finds it.
+    ports:
+      - "80:80"
+    depends_on:
+      - api-server
+      - controller
+
+volumes:
+  mongo_data:

@@ -1,0 +1,15 @@
+{
+  "name": "smartbulb-http-demo",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "server": "node server.js",
+    "sensor": "node sensor_client.js",
+    "bulb": "node bulb_client.js"
+  },
+  "dependencies": {
+    "axios": "^1.13.5",
+    "express": "^4.22.1",
+    "morgan": "^1.10.1"
+  }
+}

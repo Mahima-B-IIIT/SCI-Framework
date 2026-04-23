@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+
+  server:
+    build: ./server
+    container_name: server
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+
+  controller:
+    build: ./controller
+    container_name: controller
+    ports:
+      - "5001:5001"
+    depends_on:
+      - mongodb
+
+  # Use the same build context, but different start commands
+  temp-sensor:
+    build: ./sensors
+    command: node temp_sensor.js
+    depends_on:
+      - server
+
+  pressure-sensor:
+    build: ./sensors
+    command: node pressure_sensor.js
+    depends_on:
+      - server
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+      - controller

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Smart Bulb Controller UI</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="app">
+  <h1>Smart Bulb Controller</h1>
+  <p class="subtitle">Real-time IoT Shadow View + Manual Control</p>
+
+  <!-- SHADOW STATE -->
+  <section class="card">
+    <h2>Bulb State</h2>
+    <div class="row"><span>Lights:</span><span id="lights"></span></div>
+    <div class="row"><span>Light Off Timestamp:</span><span id="offTs"></span></div>
+    <div class="row"><span>Delta (Pending Cmd):</span><span id="delta"></span></div>
+    <button id="refresh">Refresh</button>
+  </section>
+
+  <!-- MANUAL CONTROL -->
+  <section class="card">
+    <h2>Manual Override</h2>
+    <button id="onBtn">Turn ON</button>
+    <button id="offBtn">Turn OFF</button>
+  </section>
+
+  <!-- MANUAL BRIGHTNESS -->
+  <section class="card">
+    <h2>Manual Brightness Input</h2>
+    <div class="row">
+      <span>Brightness (0–1000):</span>
+      <input id="brightnessInput" type="number" min="0" max="1000" style="width:120px;">
+    </div>
+    <button id="sendBrightnessBtn">Send Brightness</button>
+  </section>
+
+  <!-- ALERT TEST -->
+  <section class="card">
+    <h2>Alert Test</h2>
+    <button id="runAlertTestBtn">Run 30-second Alert Test</button>
+  </section>
+
+  <!-- DURATION -->
+  <section class="card">
+    <h2>Duration Info</h2>
+    <div class="row"><span>Seconds since last OFF:</span><span id="secs"></span></div>
+    <div class="row"><span>Last Alert:</span><span id="alert"></span></div>
+    <button id="refreshDuration">Refresh</button>
+  </section>
+
+  <section class="card">
+    <h2>Debug Log</h2>
+    <pre id="log"></pre>
+  </section>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

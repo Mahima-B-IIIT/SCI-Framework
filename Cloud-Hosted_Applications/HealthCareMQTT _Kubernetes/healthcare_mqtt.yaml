@@ -1,0 +1,305 @@
+# ---------------- MongoDB ----------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      labels:
+        app: mongo
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:6
+          ports:
+            - containerPort: 27017
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+spec:
+  selector:
+    app: mongo
+  ports:
+    - port: 27017
+      targetPort: 27017
+
+# ---------------- Mosquitto ----------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mosquitto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mosquitto
+  template:
+    metadata:
+      labels:
+        app: mosquitto
+    spec:
+      containers:
+        - name: mosquitto
+          image: eclipse-mosquitto
+          ports:
+            - containerPort: 1883
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mosquitto
+spec:
+  selector:
+    app: mosquitto
+  ports:
+    - port: 1883
+      targetPort: 1883
+
+# ---------------- Backend ----------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: hcmqttbackend:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MQTT_BROKER
+              value: "mosquitto"
+            - name: MONGO_URI
+              value: "mongodb://mongo:27017"
+          ports:
+            - containerPort: 5000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  type: NodePort
+  selector:
+    app: backend
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30005   # you can keep this or change if conflict
+
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: backend
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: backend
+#   template:
+#     metadata:
+#       labels:
+#         app: backend
+#     spec:
+#       type: NodePort
+#       containers:
+#         - name: backend
+#           image: hcmqttbackend:latest
+#           imagePullPolicy: IfNotPresent 
+#           env:
+#             - name: MQTT_BROKER
+#               value: "mosquitto"
+#             - name: MONGO_URI
+#               value: "mongodb://mongo:27017"
+#           ports:
+#             - containerPort: 5000
+
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: backend
+# spec:
+#   selector:
+#     app: backend
+#   ports:
+#     - port: 5000
+#       targetPort: 5000
+
+# ---------------- Edge Device ----------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-device
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: edge-device
+  template:
+    metadata:
+      labels:
+        app: edge-device
+    spec:
+      containers:
+        - name: edge-device
+          image: hcmqttedge:latest
+          imagePullPolicy: IfNotPresent 
+          env:
+            - name: MQTT_BROKER
+              value: "mosquitto"
+
+# ---------------- Frontend ----------------
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: hcmqttfrontend:latest
+          imagePullPolicy: IfNotPresent 
+          ports:
+            - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30007
+
+
+
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: backend
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: backend
+#   template:
+#     metadata:
+#       labels:
+#         app: backend
+#     spec:
+#       containers:
+#         - name: backend
+#           image: your_dockerhub_username/HCmqtt_backend:latest
+#           env:
+#             - name: MQTT_BROKER
+#               value: "host.docker.internal"
+#             - name: MONGO_URI
+#               value: "mongodb://host.docker.internal:27017"
+#           ports:
+#             - containerPort: 5000
+
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: backend
+# spec:
+#   selector:
+#     app: backend
+#   ports:
+#     - port: 5000
+#       targetPort: 5000
+
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: edge-device
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: edge-device
+#   template:
+#     metadata:
+#       labels:
+#         app: edge-device
+#     spec:
+#       containers:
+#         - name: edge-device
+#           image: your_dockerhub_username/HCmqtt_edge:latest
+#           env:
+#             - name: MQTT_BROKER
+#               value: "host.docker.internal"
+
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: frontend
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: frontend
+#   template:
+#     metadata:
+#       labels:
+#         app: frontend
+#     spec:
+#       containers:
+#         - name: frontend
+#           image: your_dockerhub_username/HCmqtt_frontend:latest
+#           ports:
+#             - containerPort: 80
+
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: frontend
+# spec:
+#   type: NodePort
+#   selector:
+#     app: frontend
+#   ports:
+#     - port: 80
+#       targetPort: 80
+#       nodePort: 30007

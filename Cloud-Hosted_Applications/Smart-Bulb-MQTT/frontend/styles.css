@@ -1,0 +1,89 @@
+body {
+  background: #111827;
+  color: #e5e7eb;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.app {
+  width: 600px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  text-align: center;
+  color: #9ca3af;
+  margin-bottom: 30px;
+  font-size: 0.9em;
+}
+
+.card {
+  background: #1f2937;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  font-size: 1.1em;
+  color: #60a5fa;
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #374151;
+  padding-bottom: 8px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 0.95em;
+}
+
+/* Style for the real-time values */
+span[id], b[id] {
+  color: #10b981; /* Emerald green for values */
+  font-family: monospace;
+}
+
+button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  margin-right: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #1d4ed8;
+}
+
+input[type="number"] {
+  background: #374151;
+  border: 1px solid #4b5563;
+  color: white;
+  padding: 5px;
+  border-radius: 4px;
+}
+
+pre {
+  background: #000000;
+  color: #34d399; /* Classic terminal green */
+  padding: 12px;
+  height: 180px;
+  overflow-y: auto;
+  border-radius: 8px;
+  font-size: 0.85em;
+  line-height: 1.4;
+  border: 1px solid #374151;
+}
