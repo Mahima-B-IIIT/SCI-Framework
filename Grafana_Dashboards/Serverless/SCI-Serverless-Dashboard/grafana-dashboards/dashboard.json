@@ -1,0 +1,561 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.04
+              },
+              {
+                "color": "red",
+                "value": 0.08
+              }
+            ]
+          },
+          "unit": "kWh",
+          "decimals": 8
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 0,
+        "y": 0
+      },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-datasource"
+          },
+          "query": "from(bucket: \"demo_bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"measured_metrics\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey:[\"_field\"], valueColumn:\"_value\")\n  |> map(fn: (r) => ({\n      r with\n      ELcompute: (((if exists r[\"lambda_DoorbellLambda_Tcpu\"] then r[\"lambda_DoorbellLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_DoorbellLambda_Malloc\"] then r[\"lambda_DoorbellLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FaceRecognitionLambda_Tcpu\"] then r[\"lambda_FaceRecognitionLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_FaceRecognitionLambda_Malloc\"] then r[\"lambda_FaceRecognitionLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FetchWebsiteFromS3_Tcpu\"] then r[\"lambda_FetchWebsiteFromS3_Tcpu\"] else 0.0) * (if exists r[\"lambda_FetchWebsiteFromS3_Malloc\"] then r[\"lambda_FetchWebsiteFromS3_Malloc\"] else 0.0)) + ((if exists r[\"lambda_PINVerificationLambda_Tcpu\"] then r[\"lambda_PINVerificationLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_PINVerificationLambda_Malloc\"] then r[\"lambda_PINVerificationLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_UploadLambda_Tcpu\"] then r[\"lambda_UploadLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_UploadLambda_Malloc\"] then r[\"lambda_UploadLambda_Malloc\"] else 0.0))) * (if exists r[\"assumed_P_core_w\"] then r[\"assumed_P_core_w\"] else 95.0) / ((1000.0 * 3600.0 * 1000.0) * 1769.0),\n      ELmemory:  (((if exists r[\"lambda_DoorbellLambda_Mused\"] then r[\"lambda_DoorbellLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Mused\"] then r[\"lambda_FaceRecognitionLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Mused\"] then r[\"lambda_FetchWebsiteFromS3_Mused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Mused\"] then r[\"lambda_PINVerificationLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Mused\"] then r[\"lambda_UploadLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_mem_w\"] then r[\"assumed_P_mem_w\"] else 0.392) / (1024.0 * (1000.0 * 3600.0 * 1000.0)),\n      ELstorage: (((if exists r[\"lambda_DoorbellLambda_Sused\"] then r[\"lambda_DoorbellLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Sused\"] then r[\"lambda_FaceRecognitionLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Sused\"] then r[\"lambda_FetchWebsiteFromS3_Sused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Sused\"] then r[\"lambda_PINVerificationLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Sused\"] then r[\"lambda_UploadLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_storage_w\"] then r[\"assumed_P_storage_w\"] else 0.0012) / (1073741824.0 * (1000.0 * 3600.0 * 1000.0)),\n      Enetwork:  ((if exists r[\"lambda_DoorbellLambda_Dnetwork\"] then r[\"lambda_DoorbellLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Dnetwork\"] then r[\"lambda_FaceRecognitionLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] then r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Dnetwork\"] then r[\"lambda_PINVerificationLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Dnetwork\"] then r[\"lambda_UploadLambda_Dnetwork\"] else 0.0)) * (if exists r[\"assumed_E_network_kwh_gb\"] then r[\"assumed_E_network_kwh_gb\"] else 0.001) / 1073741824.0,\n      ES3active: ((if exists r[\"s3_mhm-home-security-img_Rtotal\"] then r[\"s3_mhm-home-security-img_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-img_Dlatency\"] then r[\"s3_mhm-home-security-img_Dlatency\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_Rtotal\"] then r[\"s3_mhm-home-security-ui_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-ui_Dlatency\"] then r[\"s3_mhm-home-security-ui_Dlatency\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      ES3idle:   ((((if exists r[\"s3_mhm-home-security-img_B\"] then r[\"s3_mhm-home-security-img_B\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_B\"] then r[\"s3_mhm-home-security-ui_B\"] else 0.0)) + ((if exists r[\"assumed_N_inv\"] then r[\"assumed_N_inv\"] else 4.0) * (if exists r[\"assumed_S_upload_mb\"] then r[\"assumed_S_upload_mb\"] else 32666.0) )) / 1073741824.0) * ((if exists r[\"assumed_P_idle_w\"] then r[\"assumed_P_idle_w\"] else 18.5) / ((if exists r[\"assumed_C_mem_gb\"] then r[\"assumed_C_mem_gb\"] else 5120.0) * 1000.0)),\n      EDB: ((if exists r[\"dynamodb_Events_Lsuccess\"] then r[\"dynamodb_Events_Lsuccess\"] else 0.0) + (if exists r[\"dynamodb_Users_Lsuccess\"] then r[\"dynamodb_Users_Lsuccess\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      EAPI: (if exists r[\"api_API_LAPI\"] then r[\"api_API_LAPI\"] else 0.0) * (if exists r[\"assumed_P_Proc_w\"] then r[\"assumed_P_Proc_w\"] else 95.0) / (1000.0 * 3600.0 * 1000.0),\n      ERekog: (if exists r[\"rekognition_Rekognition_Tresponse\"] then r[\"rekognition_Rekognition_Tresponse\"] else 0.0) * (if exists r[\"assumed_P_GPU_w\"] then (if r[\"assumed_P_GPU_w\"] > 0.0 then r[\"assumed_P_GPU_w\"] else 70.0) else 70.0) / (1000.0 * 3600.0 * 1000.0),\n      PUE: (if exists r[\"assumed_PUE\"] then r[\"assumed_PUE\"] else 1.15),\n      GEF: (if exists r[\"grid_emission_factor\"] then r[\"grid_emission_factor\"] else 541.0)\n  }))\n  |> map(fn: (r) => ({ r with _value: r.ELcompute + r.ELmemory + r.ELstorage + r.Enetwork }))\n  \n  |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Lambda Energy",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.04
+              },
+              {
+                "color": "red",
+                "value": 0.08
+              }
+            ]
+          },
+          "unit": "kWh",
+          "decimals": 8
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 4,
+        "y": 0
+      },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-datasource"
+          },
+          "query": "from(bucket: \"demo_bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"measured_metrics\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey:[\"_field\"], valueColumn:\"_value\")\n  |> map(fn: (r) => ({\n      r with\n      ELcompute: (((if exists r[\"lambda_DoorbellLambda_Tcpu\"] then r[\"lambda_DoorbellLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_DoorbellLambda_Malloc\"] then r[\"lambda_DoorbellLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FaceRecognitionLambda_Tcpu\"] then r[\"lambda_FaceRecognitionLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_FaceRecognitionLambda_Malloc\"] then r[\"lambda_FaceRecognitionLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FetchWebsiteFromS3_Tcpu\"] then r[\"lambda_FetchWebsiteFromS3_Tcpu\"] else 0.0) * (if exists r[\"lambda_FetchWebsiteFromS3_Malloc\"] then r[\"lambda_FetchWebsiteFromS3_Malloc\"] else 0.0)) + ((if exists r[\"lambda_PINVerificationLambda_Tcpu\"] then r[\"lambda_PINVerificationLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_PINVerificationLambda_Malloc\"] then r[\"lambda_PINVerificationLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_UploadLambda_Tcpu\"] then r[\"lambda_UploadLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_UploadLambda_Malloc\"] then r[\"lambda_UploadLambda_Malloc\"] else 0.0))) * (if exists r[\"assumed_P_core_w\"] then r[\"assumed_P_core_w\"] else 95.0) / ((1000.0 * 3600.0 * 1000.0) * 1769.0),\n      ELmemory:  (((if exists r[\"lambda_DoorbellLambda_Mused\"] then r[\"lambda_DoorbellLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Mused\"] then r[\"lambda_FaceRecognitionLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Mused\"] then r[\"lambda_FetchWebsiteFromS3_Mused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Mused\"] then r[\"lambda_PINVerificationLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Mused\"] then r[\"lambda_UploadLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_mem_w\"] then r[\"assumed_P_mem_w\"] else 0.392) / (1024.0 * (1000.0 * 3600.0 * 1000.0)),\n      ELstorage: (((if exists r[\"lambda_DoorbellLambda_Sused\"] then r[\"lambda_DoorbellLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Sused\"] then r[\"lambda_FaceRecognitionLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Sused\"] then r[\"lambda_FetchWebsiteFromS3_Sused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Sused\"] then r[\"lambda_PINVerificationLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Sused\"] then r[\"lambda_UploadLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_storage_w\"] then r[\"assumed_P_storage_w\"] else 0.0012) / (1073741824.0 * (1000.0 * 3600.0 * 1000.0)),\n      Enetwork:  ((if exists r[\"lambda_DoorbellLambda_Dnetwork\"] then r[\"lambda_DoorbellLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Dnetwork\"] then r[\"lambda_FaceRecognitionLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] then r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Dnetwork\"] then r[\"lambda_PINVerificationLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Dnetwork\"] then r[\"lambda_UploadLambda_Dnetwork\"] else 0.0)) * (if exists r[\"assumed_E_network_kwh_gb\"] then r[\"assumed_E_network_kwh_gb\"] else 0.001) / 1073741824.0,\n      ES3active: ((if exists r[\"s3_mhm-home-security-img_Rtotal\"] then r[\"s3_mhm-home-security-img_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-img_Dlatency\"] then r[\"s3_mhm-home-security-img_Dlatency\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_Rtotal\"] then r[\"s3_mhm-home-security-ui_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-ui_Dlatency\"] then r[\"s3_mhm-home-security-ui_Dlatency\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      ES3idle:   ((((if exists r[\"s3_mhm-home-security-img_B\"] then r[\"s3_mhm-home-security-img_B\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_B\"] then r[\"s3_mhm-home-security-ui_B\"] else 0.0)) + ((if exists r[\"assumed_N_inv\"] then r[\"assumed_N_inv\"] else 4.0) * (if exists r[\"assumed_S_upload_mb\"] then r[\"assumed_S_upload_mb\"] else 32666.0) )) / 1073741824.0) * ((if exists r[\"assumed_P_idle_w\"] then r[\"assumed_P_idle_w\"] else 18.5) / ((if exists r[\"assumed_C_mem_gb\"] then r[\"assumed_C_mem_gb\"] else 5120.0) * 1000.0)),\n      EDB: ((if exists r[\"dynamodb_Events_Lsuccess\"] then r[\"dynamodb_Events_Lsuccess\"] else 0.0) + (if exists r[\"dynamodb_Users_Lsuccess\"] then r[\"dynamodb_Users_Lsuccess\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      EAPI: (if exists r[\"api_API_LAPI\"] then r[\"api_API_LAPI\"] else 0.0) * (if exists r[\"assumed_P_Proc_w\"] then r[\"assumed_P_Proc_w\"] else 95.0) / (1000.0 * 3600.0 * 1000.0),\n      ERekog: (if exists r[\"rekognition_Rekognition_Tresponse\"] then r[\"rekognition_Rekognition_Tresponse\"] else 0.0) * (if exists r[\"assumed_P_GPU_w\"] then (if r[\"assumed_P_GPU_w\"] > 0.0 then r[\"assumed_P_GPU_w\"] else 70.0) else 70.0) / (1000.0 * 3600.0 * 1000.0),\n      PUE: (if exists r[\"assumed_PUE\"] then r[\"assumed_PUE\"] else 1.15),\n      GEF: (if exists r[\"grid_emission_factor\"] then r[\"grid_emission_factor\"] else 541.0)\n  }))\n  |> map(fn: (r) => ({ r with _value: r.ES3active + r.ES3idle }))\n  \n  |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "S3 Energy",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.04
+              },
+              {
+                "color": "red",
+                "value": 0.08
+              }
+            ]
+          },
+          "unit": "kWh",
+          "decimals": 8
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 8,
+        "y": 0
+      },
+      "id": 11,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-datasource"
+          },
+          "query": "from(bucket: \"demo_bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"measured_metrics\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey:[\"_field\"], valueColumn:\"_value\")\n  |> map(fn: (r) => ({\n      r with\n      ELcompute: (((if exists r[\"lambda_DoorbellLambda_Tcpu\"] then r[\"lambda_DoorbellLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_DoorbellLambda_Malloc\"] then r[\"lambda_DoorbellLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FaceRecognitionLambda_Tcpu\"] then r[\"lambda_FaceRecognitionLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_FaceRecognitionLambda_Malloc\"] then r[\"lambda_FaceRecognitionLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FetchWebsiteFromS3_Tcpu\"] then r[\"lambda_FetchWebsiteFromS3_Tcpu\"] else 0.0) * (if exists r[\"lambda_FetchWebsiteFromS3_Malloc\"] then r[\"lambda_FetchWebsiteFromS3_Malloc\"] else 0.0)) + ((if exists r[\"lambda_PINVerificationLambda_Tcpu\"] then r[\"lambda_PINVerificationLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_PINVerificationLambda_Malloc\"] then r[\"lambda_PINVerificationLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_UploadLambda_Tcpu\"] then r[\"lambda_UploadLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_UploadLambda_Malloc\"] then r[\"lambda_UploadLambda_Malloc\"] else 0.0))) * (if exists r[\"assumed_P_core_w\"] then r[\"assumed_P_core_w\"] else 95.0) / ((1000.0 * 3600.0 * 1000.0) * 1769.0),\n      ELmemory:  (((if exists r[\"lambda_DoorbellLambda_Mused\"] then r[\"lambda_DoorbellLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Mused\"] then r[\"lambda_FaceRecognitionLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Mused\"] then r[\"lambda_FetchWebsiteFromS3_Mused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Mused\"] then r[\"lambda_PINVerificationLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Mused\"] then r[\"lambda_UploadLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_mem_w\"] then r[\"assumed_P_mem_w\"] else 0.392) / (1024.0 * (1000.0 * 3600.0 * 1000.0)),\n      ELstorage: (((if exists r[\"lambda_DoorbellLambda_Sused\"] then r[\"lambda_DoorbellLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Sused\"] then r[\"lambda_FaceRecognitionLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Sused\"] then r[\"lambda_FetchWebsiteFromS3_Sused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Sused\"] then r[\"lambda_PINVerificationLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Sused\"] then r[\"lambda_UploadLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_storage_w\"] then r[\"assumed_P_storage_w\"] else 0.0012) / (1073741824.0 * (1000.0 * 3600.0 * 1000.0)),\n      Enetwork:  ((if exists r[\"lambda_DoorbellLambda_Dnetwork\"] then r[\"lambda_DoorbellLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Dnetwork\"] then r[\"lambda_FaceRecognitionLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] then r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Dnetwork\"] then r[\"lambda_PINVerificationLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Dnetwork\"] then r[\"lambda_UploadLambda_Dnetwork\"] else 0.0)) * (if exists r[\"assumed_E_network_kwh_gb\"] then r[\"assumed_E_network_kwh_gb\"] else 0.001) / 1073741824.0,\n      ES3active: ((if exists r[\"s3_mhm-home-security-img_Rtotal\"] then r[\"s3_mhm-home-security-img_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-img_Dlatency\"] then r[\"s3_mhm-home-security-img_Dlatency\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_Rtotal\"] then r[\"s3_mhm-home-security-ui_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-ui_Dlatency\"] then r[\"s3_mhm-home-security-ui_Dlatency\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      ES3idle:   ((((if exists r[\"s3_mhm-home-security-img_B\"] then r[\"s3_mhm-home-security-img_B\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_B\"] then r[\"s3_mhm-home-security-ui_B\"] else 0.0)) + ((if exists r[\"assumed_N_inv\"] then r[\"assumed_N_inv\"] else 4.0) * (if exists r[\"assumed_S_upload_mb\"] then r[\"assumed_S_upload_mb\"] else 32666.0) )) / 1073741824.0) * ((if exists r[\"assumed_P_idle_w\"] then r[\"assumed_P_idle_w\"] else 18.5) / ((if exists r[\"assumed_C_mem_gb\"] then r[\"assumed_C_mem_gb\"] else 5120.0) * 1000.0)),\n      EDB: ((if exists r[\"dynamodb_Events_Lsuccess\"] then r[\"dynamodb_Events_Lsuccess\"] else 0.0) + (if exists r[\"dynamodb_Users_Lsuccess\"] then r[\"dynamodb_Users_Lsuccess\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      EAPI: (if exists r[\"api_API_LAPI\"] then r[\"api_API_LAPI\"] else 0.0) * (if exists r[\"assumed_P_Proc_w\"] then r[\"assumed_P_Proc_w\"] else 95.0) / (1000.0 * 3600.0 * 1000.0),\n      ERekog: (if exists r[\"rekognition_Rekognition_Tresponse\"] then r[\"rekognition_Rekognition_Tresponse\"] else 0.0) * (if exists r[\"assumed_P_GPU_w\"] then (if r[\"assumed_P_GPU_w\"] > 0.0 then r[\"assumed_P_GPU_w\"] else 70.0) else 70.0) / (1000.0 * 3600.0 * 1000.0),\n      PUE: (if exists r[\"assumed_PUE\"] then r[\"assumed_PUE\"] else 1.15),\n      GEF: (if exists r[\"grid_emission_factor\"] then r[\"grid_emission_factor\"] else 541.0)\n  }))\n  |> map(fn: (r) => ({ r with _value: r.EDB }))\n  \n  |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "DynamoDB Energy",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.04
+              },
+              {
+                "color": "red",
+                "value": 0.08
+              }
+            ]
+          },
+          "unit": "kWh",
+          "decimals": 8
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 12,
+        "y": 0
+      },
+      "id": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-datasource"
+          },
+          "query": "from(bucket: \"demo_bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"measured_metrics\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey:[\"_field\"], valueColumn:\"_value\")\n  |> map(fn: (r) => ({\n      r with\n      ELcompute: (((if exists r[\"lambda_DoorbellLambda_Tcpu\"] then r[\"lambda_DoorbellLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_DoorbellLambda_Malloc\"] then r[\"lambda_DoorbellLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FaceRecognitionLambda_Tcpu\"] then r[\"lambda_FaceRecognitionLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_FaceRecognitionLambda_Malloc\"] then r[\"lambda_FaceRecognitionLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FetchWebsiteFromS3_Tcpu\"] then r[\"lambda_FetchWebsiteFromS3_Tcpu\"] else 0.0) * (if exists r[\"lambda_FetchWebsiteFromS3_Malloc\"] then r[\"lambda_FetchWebsiteFromS3_Malloc\"] else 0.0)) + ((if exists r[\"lambda_PINVerificationLambda_Tcpu\"] then r[\"lambda_PINVerificationLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_PINVerificationLambda_Malloc\"] then r[\"lambda_PINVerificationLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_UploadLambda_Tcpu\"] then r[\"lambda_UploadLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_UploadLambda_Malloc\"] then r[\"lambda_UploadLambda_Malloc\"] else 0.0))) * (if exists r[\"assumed_P_core_w\"] then r[\"assumed_P_core_w\"] else 95.0) / ((1000.0 * 3600.0 * 1000.0) * 1769.0),\n      ELmemory:  (((if exists r[\"lambda_DoorbellLambda_Mused\"] then r[\"lambda_DoorbellLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Mused\"] then r[\"lambda_FaceRecognitionLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Mused\"] then r[\"lambda_FetchWebsiteFromS3_Mused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Mused\"] then r[\"lambda_PINVerificationLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Mused\"] then r[\"lambda_UploadLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_mem_w\"] then r[\"assumed_P_mem_w\"] else 0.392) / (1024.0 * (1000.0 * 3600.0 * 1000.0)),\n      ELstorage: (((if exists r[\"lambda_DoorbellLambda_Sused\"] then r[\"lambda_DoorbellLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Sused\"] then r[\"lambda_FaceRecognitionLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Sused\"] then r[\"lambda_FetchWebsiteFromS3_Sused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Sused\"] then r[\"lambda_PINVerificationLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Sused\"] then r[\"lambda_UploadLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_storage_w\"] then r[\"assumed_P_storage_w\"] else 0.0012) / (1073741824.0 * (1000.0 * 3600.0 * 1000.0)),\n      Enetwork:  ((if exists r[\"lambda_DoorbellLambda_Dnetwork\"] then r[\"lambda_DoorbellLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Dnetwork\"] then r[\"lambda_FaceRecognitionLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] then r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Dnetwork\"] then r[\"lambda_PINVerificationLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Dnetwork\"] then r[\"lambda_UploadLambda_Dnetwork\"] else 0.0)) * (if exists r[\"assumed_E_network_kwh_gb\"] then r[\"assumed_E_network_kwh_gb\"] else 0.001) / 1073741824.0,\n      ES3active: ((if exists r[\"s3_mhm-home-security-img_Rtotal\"] then r[\"s3_mhm-home-security-img_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-img_Dlatency\"] then r[\"s3_mhm-home-security-img_Dlatency\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_Rtotal\"] then r[\"s3_mhm-home-security-ui_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-ui_Dlatency\"] then r[\"s3_mhm-home-security-ui_Dlatency\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      ES3idle:   ((((if exists r[\"s3_mhm-home-security-img_B\"] then r[\"s3_mhm-home-security-img_B\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_B\"] then r[\"s3_mhm-home-security-ui_B\"] else 0.0)) + ((if exists r[\"assumed_N_inv\"] then r[\"assumed_N_inv\"] else 4.0) * (if exists r[\"assumed_S_upload_mb\"] then r[\"assumed_S_upload_mb\"] else 32666.0) )) / 1073741824.0) * ((if exists r[\"assumed_P_idle_w\"] then r[\"assumed_P_idle_w\"] else 18.5) / ((if exists r[\"assumed_C_mem_gb\"] then r[\"assumed_C_mem_gb\"] else 5120.0) * 1000.0)),\n      EDB: ((if exists r[\"dynamodb_Events_Lsuccess\"] then r[\"dynamodb_Events_Lsuccess\"] else 0.0) + (if exists r[\"dynamodb_Users_Lsuccess\"] then r[\"dynamodb_Users_Lsuccess\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      EAPI: (if exists r[\"api_API_LAPI\"] then r[\"api_API_LAPI\"] else 0.0) * (if exists r[\"assumed_P_Proc_w\"] then r[\"assumed_P_Proc_w\"] else 95.0) / (1000.0 * 3600.0 * 1000.0),\n      ERekog: (if exists r[\"rekognition_Rekognition_Tresponse\"] then r[\"rekognition_Rekognition_Tresponse\"] else 0.0) * (if exists r[\"assumed_P_GPU_w\"] then (if r[\"assumed_P_GPU_w\"] > 0.0 then r[\"assumed_P_GPU_w\"] else 70.0) else 70.0) / (1000.0 * 3600.0 * 1000.0),\n      PUE: (if exists r[\"assumed_PUE\"] then r[\"assumed_PUE\"] else 1.15),\n      GEF: (if exists r[\"grid_emission_factor\"] then r[\"grid_emission_factor\"] else 541.0)\n  }))\n  |> map(fn: (r) => ({ r with _value: r.EAPI }))\n  \n  |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "API Gateway Energy",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.04
+              },
+              {
+                "color": "red",
+                "value": 0.08
+              }
+            ]
+          },
+          "unit": "kWh",
+          "decimals": 8
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 16,
+        "y": 0
+      },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-datasource"
+          },
+          "query": "from(bucket: \"demo_bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"measured_metrics\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey:[\"_field\"], valueColumn:\"_value\")\n  |> map(fn: (r) => ({\n      r with\n      ELcompute: (((if exists r[\"lambda_DoorbellLambda_Tcpu\"] then r[\"lambda_DoorbellLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_DoorbellLambda_Malloc\"] then r[\"lambda_DoorbellLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FaceRecognitionLambda_Tcpu\"] then r[\"lambda_FaceRecognitionLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_FaceRecognitionLambda_Malloc\"] then r[\"lambda_FaceRecognitionLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FetchWebsiteFromS3_Tcpu\"] then r[\"lambda_FetchWebsiteFromS3_Tcpu\"] else 0.0) * (if exists r[\"lambda_FetchWebsiteFromS3_Malloc\"] then r[\"lambda_FetchWebsiteFromS3_Malloc\"] else 0.0)) + ((if exists r[\"lambda_PINVerificationLambda_Tcpu\"] then r[\"lambda_PINVerificationLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_PINVerificationLambda_Malloc\"] then r[\"lambda_PINVerificationLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_UploadLambda_Tcpu\"] then r[\"lambda_UploadLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_UploadLambda_Malloc\"] then r[\"lambda_UploadLambda_Malloc\"] else 0.0))) * (if exists r[\"assumed_P_core_w\"] then r[\"assumed_P_core_w\"] else 95.0) / ((1000.0 * 3600.0 * 1000.0) * 1769.0),\n      ELmemory:  (((if exists r[\"lambda_DoorbellLambda_Mused\"] then r[\"lambda_DoorbellLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Mused\"] then r[\"lambda_FaceRecognitionLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Mused\"] then r[\"lambda_FetchWebsiteFromS3_Mused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Mused\"] then r[\"lambda_PINVerificationLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Mused\"] then r[\"lambda_UploadLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_mem_w\"] then r[\"assumed_P_mem_w\"] else 0.392) / (1024.0 * (1000.0 * 3600.0 * 1000.0)),\n      ELstorage: (((if exists r[\"lambda_DoorbellLambda_Sused\"] then r[\"lambda_DoorbellLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Sused\"] then r[\"lambda_FaceRecognitionLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Sused\"] then r[\"lambda_FetchWebsiteFromS3_Sused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Sused\"] then r[\"lambda_PINVerificationLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Sused\"] then r[\"lambda_UploadLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_storage_w\"] then r[\"assumed_P_storage_w\"] else 0.0012) / (1073741824.0 * (1000.0 * 3600.0 * 1000.0)),\n      Enetwork:  ((if exists r[\"lambda_DoorbellLambda_Dnetwork\"] then r[\"lambda_DoorbellLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Dnetwork\"] then r[\"lambda_FaceRecognitionLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] then r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Dnetwork\"] then r[\"lambda_PINVerificationLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Dnetwork\"] then r[\"lambda_UploadLambda_Dnetwork\"] else 0.0)) * (if exists r[\"assumed_E_network_kwh_gb\"] then r[\"assumed_E_network_kwh_gb\"] else 0.001) / 1073741824.0,\n      ES3active: ((if exists r[\"s3_mhm-home-security-img_Rtotal\"] then r[\"s3_mhm-home-security-img_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-img_Dlatency\"] then r[\"s3_mhm-home-security-img_Dlatency\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_Rtotal\"] then r[\"s3_mhm-home-security-ui_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-ui_Dlatency\"] then r[\"s3_mhm-home-security-ui_Dlatency\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      ES3idle:   ((((if exists r[\"s3_mhm-home-security-img_B\"] then r[\"s3_mhm-home-security-img_B\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_B\"] then r[\"s3_mhm-home-security-ui_B\"] else 0.0)) + ((if exists r[\"assumed_N_inv\"] then r[\"assumed_N_inv\"] else 4.0) * (if exists r[\"assumed_S_upload_mb\"] then r[\"assumed_S_upload_mb\"] else 32666.0) )) / 1073741824.0) * ((if exists r[\"assumed_P_idle_w\"] then r[\"assumed_P_idle_w\"] else 18.5) / ((if exists r[\"assumed_C_mem_gb\"] then r[\"assumed_C_mem_gb\"] else 5120.0) * 1000.0)),\n      EDB: ((if exists r[\"dynamodb_Events_Lsuccess\"] then r[\"dynamodb_Events_Lsuccess\"] else 0.0) + (if exists r[\"dynamodb_Users_Lsuccess\"] then r[\"dynamodb_Users_Lsuccess\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      EAPI: (if exists r[\"api_API_LAPI\"] then r[\"api_API_LAPI\"] else 0.0) * (if exists r[\"assumed_P_Proc_w\"] then r[\"assumed_P_Proc_w\"] else 95.0) / (1000.0 * 3600.0 * 1000.0),\n      ERekog: (if exists r[\"rekognition_Rekognition_Tresponse\"] then r[\"rekognition_Rekognition_Tresponse\"] else 0.0) * (if exists r[\"assumed_P_GPU_w\"] then (if r[\"assumed_P_GPU_w\"] > 0.0 then r[\"assumed_P_GPU_w\"] else 70.0) else 70.0) / (1000.0 * 3600.0 * 1000.0),\n      PUE: (if exists r[\"assumed_PUE\"] then r[\"assumed_PUE\"] else 1.15),\n      GEF: (if exists r[\"grid_emission_factor\"] then r[\"grid_emission_factor\"] else 541.0)\n  }))\n  |> map(fn: (r) => ({ r with _value: r.ERekog }))\n  \n  |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Rekognition Energy",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
+            ]
+          },
+          "unit": "gCO2eq",
+          "decimals": 4
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 4,
+        "x": 20,
+        "y": 0
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-datasource"
+          },
+          "query": "from(bucket: \"demo_bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"measured_metrics\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey:[\"_field\"], valueColumn:\"_value\")\n  |> map(fn: (r) => ({\n      r with\n      ELcompute: (((if exists r[\"lambda_DoorbellLambda_Tcpu\"] then r[\"lambda_DoorbellLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_DoorbellLambda_Malloc\"] then r[\"lambda_DoorbellLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FaceRecognitionLambda_Tcpu\"] then r[\"lambda_FaceRecognitionLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_FaceRecognitionLambda_Malloc\"] then r[\"lambda_FaceRecognitionLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FetchWebsiteFromS3_Tcpu\"] then r[\"lambda_FetchWebsiteFromS3_Tcpu\"] else 0.0) * (if exists r[\"lambda_FetchWebsiteFromS3_Malloc\"] then r[\"lambda_FetchWebsiteFromS3_Malloc\"] else 0.0)) + ((if exists r[\"lambda_PINVerificationLambda_Tcpu\"] then r[\"lambda_PINVerificationLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_PINVerificationLambda_Malloc\"] then r[\"lambda_PINVerificationLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_UploadLambda_Tcpu\"] then r[\"lambda_UploadLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_UploadLambda_Malloc\"] then r[\"lambda_UploadLambda_Malloc\"] else 0.0))) * (if exists r[\"assumed_P_core_w\"] then r[\"assumed_P_core_w\"] else 95.0) / ((1000.0 * 3600.0 * 1000.0) * 1769.0),\n      ELmemory:  (((if exists r[\"lambda_DoorbellLambda_Mused\"] then r[\"lambda_DoorbellLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Mused\"] then r[\"lambda_FaceRecognitionLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Mused\"] then r[\"lambda_FetchWebsiteFromS3_Mused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Mused\"] then r[\"lambda_PINVerificationLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Mused\"] then r[\"lambda_UploadLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_mem_w\"] then r[\"assumed_P_mem_w\"] else 0.392) / (1024.0 * (1000.0 * 3600.0 * 1000.0)),\n      ELstorage: (((if exists r[\"lambda_DoorbellLambda_Sused\"] then r[\"lambda_DoorbellLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Sused\"] then r[\"lambda_FaceRecognitionLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Sused\"] then r[\"lambda_FetchWebsiteFromS3_Sused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Sused\"] then r[\"lambda_PINVerificationLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Sused\"] then r[\"lambda_UploadLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_storage_w\"] then r[\"assumed_P_storage_w\"] else 0.0012) / (1073741824.0 * (1000.0 * 3600.0 * 1000.0)),\n      Enetwork:  ((if exists r[\"lambda_DoorbellLambda_Dnetwork\"] then r[\"lambda_DoorbellLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Dnetwork\"] then r[\"lambda_FaceRecognitionLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] then r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Dnetwork\"] then r[\"lambda_PINVerificationLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Dnetwork\"] then r[\"lambda_UploadLambda_Dnetwork\"] else 0.0)) * (if exists r[\"assumed_E_network_kwh_gb\"] then r[\"assumed_E_network_kwh_gb\"] else 0.001) / 1073741824.0,\n      ES3active: ((if exists r[\"s3_mhm-home-security-img_Rtotal\"] then r[\"s3_mhm-home-security-img_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-img_Dlatency\"] then r[\"s3_mhm-home-security-img_Dlatency\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_Rtotal\"] then r[\"s3_mhm-home-security-ui_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-ui_Dlatency\"] then r[\"s3_mhm-home-security-ui_Dlatency\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      ES3idle:   ((((if exists r[\"s3_mhm-home-security-img_B\"] then r[\"s3_mhm-home-security-img_B\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_B\"] then r[\"s3_mhm-home-security-ui_B\"] else 0.0)) + ((if exists r[\"assumed_N_inv\"] then r[\"assumed_N_inv\"] else 4.0) * (if exists r[\"assumed_S_upload_mb\"] then r[\"assumed_S_upload_mb\"] else 32666.0) )) / 1073741824.0) * ((if exists r[\"assumed_P_idle_w\"] then r[\"assumed_P_idle_w\"] else 18.5) / ((if exists r[\"assumed_C_mem_gb\"] then r[\"assumed_C_mem_gb\"] else 5120.0) * 1000.0)),\n      EDB: ((if exists r[\"dynamodb_Events_Lsuccess\"] then r[\"dynamodb_Events_Lsuccess\"] else 0.0) + (if exists r[\"dynamodb_Users_Lsuccess\"] then r[\"dynamodb_Users_Lsuccess\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      EAPI: (if exists r[\"api_API_LAPI\"] then r[\"api_API_LAPI\"] else 0.0) * (if exists r[\"assumed_P_Proc_w\"] then r[\"assumed_P_Proc_w\"] else 95.0) / (1000.0 * 3600.0 * 1000.0),\n      ERekog: (if exists r[\"rekognition_Rekognition_Tresponse\"] then r[\"rekognition_Rekognition_Tresponse\"] else 0.0) * (if exists r[\"assumed_P_GPU_w\"] then (if r[\"assumed_P_GPU_w\"] > 0.0 then r[\"assumed_P_GPU_w\"] else 70.0) else 70.0) / (1000.0 * 3600.0 * 1000.0),\n      PUE: (if exists r[\"assumed_PUE\"] then r[\"assumed_PUE\"] else 1.15),\n      GEF: (if exists r[\"grid_emission_factor\"] then r[\"grid_emission_factor\"] else 541.0)\n  }))\n  |> map(fn: (r) => ({\n      r with\n      ETotal: r.ELcompute + r.ELmemory + r.ELstorage + r.Enetwork + r.EDB + r.EAPI + r.ERekog + r.ES3active + r.ES3idle\n  }))\n  |> map(fn: (r) => ({\n      r with\n      SCI: r.ETotal * r.PUE * r.GEF\n  }))\n  |> map(fn: (r) => ({ r with _value: r.SCI }))\n  \n  |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Total SCI",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-datasource"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 4
+      },
+      "id": 1,
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-datasource"
+          },
+          "query": "from(bucket: \"demo_bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"measured_metrics\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey:[\"_field\"], valueColumn:\"_value\")\n  |> map(fn: (r) => ({\n      r with\n      ELcompute: (((if exists r[\"lambda_DoorbellLambda_Tcpu\"] then r[\"lambda_DoorbellLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_DoorbellLambda_Malloc\"] then r[\"lambda_DoorbellLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FaceRecognitionLambda_Tcpu\"] then r[\"lambda_FaceRecognitionLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_FaceRecognitionLambda_Malloc\"] then r[\"lambda_FaceRecognitionLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_FetchWebsiteFromS3_Tcpu\"] then r[\"lambda_FetchWebsiteFromS3_Tcpu\"] else 0.0) * (if exists r[\"lambda_FetchWebsiteFromS3_Malloc\"] then r[\"lambda_FetchWebsiteFromS3_Malloc\"] else 0.0)) + ((if exists r[\"lambda_PINVerificationLambda_Tcpu\"] then r[\"lambda_PINVerificationLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_PINVerificationLambda_Malloc\"] then r[\"lambda_PINVerificationLambda_Malloc\"] else 0.0)) + ((if exists r[\"lambda_UploadLambda_Tcpu\"] then r[\"lambda_UploadLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_UploadLambda_Malloc\"] then r[\"lambda_UploadLambda_Malloc\"] else 0.0))) * (if exists r[\"assumed_P_core_w\"] then r[\"assumed_P_core_w\"] else 95.0) / ((1000.0 * 3600.0 * 1000.0) * 1769.0),\n      ELmemory:  (((if exists r[\"lambda_DoorbellLambda_Mused\"] then r[\"lambda_DoorbellLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Mused\"] then r[\"lambda_FaceRecognitionLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Mused\"] then r[\"lambda_FetchWebsiteFromS3_Mused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Mused\"] then r[\"lambda_PINVerificationLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Mused\"] then r[\"lambda_UploadLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_mem_w\"] then r[\"assumed_P_mem_w\"] else 0.392) / (1024.0 * (1000.0 * 3600.0 * 1000.0)),\n      ELstorage: (((if exists r[\"lambda_DoorbellLambda_Sused\"] then r[\"lambda_DoorbellLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FaceRecognitionLambda_Sused\"] then r[\"lambda_FaceRecognitionLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_FetchWebsiteFromS3_Sused\"] then r[\"lambda_FetchWebsiteFromS3_Sused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0))) + ((if exists r[\"lambda_PINVerificationLambda_Sused\"] then r[\"lambda_PINVerificationLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0))) + ((if exists r[\"lambda_UploadLambda_Sused\"] then r[\"lambda_UploadLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_storage_w\"] then r[\"assumed_P_storage_w\"] else 0.0012) / (1073741824.0 * (1000.0 * 3600.0 * 1000.0)),\n      Enetwork:  ((if exists r[\"lambda_DoorbellLambda_Dnetwork\"] then r[\"lambda_DoorbellLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Dnetwork\"] then r[\"lambda_FaceRecognitionLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] then r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Dnetwork\"] then r[\"lambda_PINVerificationLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Dnetwork\"] then r[\"lambda_UploadLambda_Dnetwork\"] else 0.0)) * (if exists r[\"assumed_E_network_kwh_gb\"] then r[\"assumed_E_network_kwh_gb\"] else 0.001) / 1073741824.0,\n      ES3active: ((if exists r[\"s3_mhm-home-security-img_Rtotal\"] then r[\"s3_mhm-home-security-img_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-img_Dlatency\"] then r[\"s3_mhm-home-security-img_Dlatency\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_Rtotal\"] then r[\"s3_mhm-home-security-ui_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-ui_Dlatency\"] then r[\"s3_mhm-home-security-ui_Dlatency\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      ES3idle:   ((((if exists r[\"s3_mhm-home-security-img_B\"] then r[\"s3_mhm-home-security-img_B\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_B\"] then r[\"s3_mhm-home-security-ui_B\"] else 0.0)) + ((if exists r[\"assumed_N_inv\"] then r[\"assumed_N_inv\"] else 4.0) * (if exists r[\"assumed_S_upload_mb\"] then r[\"assumed_S_upload_mb\"] else 32666.0) )) / 1073741824.0) * ((if exists r[\"assumed_P_idle_w\"] then r[\"assumed_P_idle_w\"] else 18.5) / ((if exists r[\"assumed_C_mem_gb\"] then r[\"assumed_C_mem_gb\"] else 5120.0) * 1000.0)),\n      EDB: ((if exists r[\"dynamodb_Events_Lsuccess\"] then r[\"dynamodb_Events_Lsuccess\"] else 0.0) + (if exists r[\"dynamodb_Users_Lsuccess\"] then r[\"dynamodb_Users_Lsuccess\"] else 0.0)) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      EAPI: (if exists r[\"api_API_LAPI\"] then r[\"api_API_LAPI\"] else 0.0) * (if exists r[\"assumed_P_Proc_w\"] then r[\"assumed_P_Proc_w\"] else 95.0) / (1000.0 * 3600.0 * 1000.0),\n      ERekog: (if exists r[\"rekognition_Rekognition_Tresponse\"] then r[\"rekognition_Rekognition_Tresponse\"] else 0.0) * (if exists r[\"assumed_P_GPU_w\"] then (if r[\"assumed_P_GPU_w\"] > 0.0 then r[\"assumed_P_GPU_w\"] else 70.0) else 70.0) / (1000.0 * 3600.0 * 1000.0),\n      PUE: (if exists r[\"assumed_PUE\"] then r[\"assumed_PUE\"] else 1.15),\n      GEF: (if exists r[\"grid_emission_factor\"] then r[\"grid_emission_factor\"] else 541.0)\n  }))\n  |> map(fn: (r) => ({\n      r with\n      ETotal: r.ELcompute + r.ELmemory + r.ELstorage + r.Enetwork + r.EDB + r.EAPI + r.ERekog + r.ES3active + r.ES3idle\n  }))\n  |> map(fn: (r) => ({\n      r with\n      SCI: r.ETotal * r.PUE * r.GEF\n  }))\n  |> map(fn: (r) => ({ r with _value: r.SCI }))\n  \n  |> keep(columns: [\"_time\", \"_value\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Software Carbon Intensity (SCI)",
+      "type": "gauge",
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "gCO2eq",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb-datasource"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "unit": "kWh",
+          "decimals": 8,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 0.04
+              },
+              {
+                "color": "red",
+                "value": 0.08
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 16,
+        "x": 8,
+        "y": 4
+      },
+      "id": 2,
+      "options": {
+        "orientation": "auto",
+        "stacking": "none",
+        "showValue": "always",
+        "barWidth": 0.8,
+        "groupWidth": 0.7,
+        "xField": "_field",
+        "valuePosition": "top",
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "influxdb-datasource"
+          },
+          "query": "data = from(bucket: \"demo_bucket\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"measured_metrics\")\n  |> last()\n  |> pivot(rowKey:[\"_time\"], columnKey:[\"_field\"], valueColumn:\"_value\")\n  |> map(fn: (r) => ({\n      r with\n      ELcompute: (((if exists r[\"lambda_DoorbellLambda_Tcpu\"] then r[\"lambda_DoorbellLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_DoorbellLambda_Malloc\"] then r[\"lambda_DoorbellLambda_Malloc\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tcpu\"] then r[\"lambda_FaceRecognitionLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_FaceRecognitionLambda_Malloc\"] then r[\"lambda_FaceRecognitionLambda_Malloc\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tcpu\"] then r[\"lambda_FetchWebsiteFromS3_Tcpu\"] else 0.0) * (if exists r[\"lambda_FetchWebsiteFromS3_Malloc\"] then r[\"lambda_FetchWebsiteFromS3_Malloc\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tcpu\"] then r[\"lambda_PINVerificationLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_PINVerificationLambda_Malloc\"] then r[\"lambda_PINVerificationLambda_Malloc\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tcpu\"] then r[\"lambda_UploadLambda_Tcpu\"] else 0.0) * (if exists r[\"lambda_UploadLambda_Malloc\"] then r[\"lambda_UploadLambda_Malloc\"] else 0.0))) * (if exists r[\"assumed_P_core_w\"] then r[\"assumed_P_core_w\"] else 95.0) / ((1000.0 * 3600.0 * 1000.0) * 1769.0),\n      ELmemory:  (((if exists r[\"lambda_DoorbellLambda_Mused\"] then r[\"lambda_DoorbellLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0)) + (if exists r[\"lambda_FaceRecognitionLambda_Mused\"] then r[\"lambda_FaceRecognitionLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0)) + (if exists r[\"lambda_FetchWebsiteFromS3_Mused\"] then r[\"lambda_FetchWebsiteFromS3_Mused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0)) + (if exists r[\"lambda_PINVerificationLambda_Mused\"] then r[\"lambda_PINVerificationLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0)) + (if exists r[\"lambda_UploadLambda_Mused\"] then r[\"lambda_UploadLambda_Mused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_mem_w\"] then r[\"assumed_P_mem_w\"] else 0.392) / (1024.0 * (1000.0 * 3600.0 * 1000.0)),\n      ELstorage: (((if exists r[\"lambda_DoorbellLambda_Sused\"] then r[\"lambda_DoorbellLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_DoorbellLambda_Texec\"] then r[\"lambda_DoorbellLambda_Texec\"] else 0.0) + (if exists r[\"lambda_DoorbellLambda_Tinit\"] then r[\"lambda_DoorbellLambda_Tinit\"] else 0.0)) + (if exists r[\"lambda_FaceRecognitionLambda_Sused\"] then r[\"lambda_FaceRecognitionLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_FaceRecognitionLambda_Texec\"] then r[\"lambda_FaceRecognitionLambda_Texec\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Tinit\"] then r[\"lambda_FaceRecognitionLambda_Tinit\"] else 0.0)) + (if exists r[\"lambda_FetchWebsiteFromS3_Sused\"] then r[\"lambda_FetchWebsiteFromS3_Sused\"] else 0.0) * ((if exists r[\"lambda_FetchWebsiteFromS3_Texec\"] then r[\"lambda_FetchWebsiteFromS3_Texec\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Tinit\"] then r[\"lambda_FetchWebsiteFromS3_Tinit\"] else 0.0)) + (if exists r[\"lambda_PINVerificationLambda_Sused\"] then r[\"lambda_PINVerificationLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_PINVerificationLambda_Texec\"] then r[\"lambda_PINVerificationLambda_Texec\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Tinit\"] then r[\"lambda_PINVerificationLambda_Tinit\"] else 0.0)) + (if exists r[\"lambda_UploadLambda_Sused\"] then r[\"lambda_UploadLambda_Sused\"] else 0.0) * ((if exists r[\"lambda_UploadLambda_Texec\"] then r[\"lambda_UploadLambda_Texec\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Tinit\"] then r[\"lambda_UploadLambda_Tinit\"] else 0.0)))) * (if exists r[\"assumed_P_storage_w\"] then r[\"assumed_P_storage_w\"] else 0.0012) / (1073741824.0 * (1000.0 * 3600.0 * 1000.0)),\n      Enetwork:  (((if exists r[\"lambda_DoorbellLambda_Dnetwork\"] then r[\"lambda_DoorbellLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FaceRecognitionLambda_Dnetwork\"] then r[\"lambda_FaceRecognitionLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] then r[\"lambda_FetchWebsiteFromS3_Dnetwork\"] else 0.0) + (if exists r[\"lambda_PINVerificationLambda_Dnetwork\"] then r[\"lambda_PINVerificationLambda_Dnetwork\"] else 0.0) + (if exists r[\"lambda_UploadLambda_Dnetwork\"] then r[\"lambda_UploadLambda_Dnetwork\"] else 0.0))) * (if exists r[\"assumed_E_network_kwh_gb\"] then r[\"assumed_E_network_kwh_gb\"] else 0.001) / 1073741824.0,\n      ES3active: (((if exists r[\"s3_mhm-home-security-img_Rtotal\"] then r[\"s3_mhm-home-security-img_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-img_Dlatency\"] then r[\"s3_mhm-home-security-img_Dlatency\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_Rtotal\"] then r[\"s3_mhm-home-security-ui_Rtotal\"] else 0.0) * (if exists r[\"s3_mhm-home-security-ui_Dlatency\"] then r[\"s3_mhm-home-security-ui_Dlatency\"] else 0.0))) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      ES3idle:   (((((if exists r[\"s3_mhm-home-security-img_B\"] then r[\"s3_mhm-home-security-img_B\"] else 0.0) + (if exists r[\"s3_mhm-home-security-ui_B\"] then r[\"s3_mhm-home-security-ui_B\"] else 0.0))) + ((if exists r[\"assumed_N_inv\"] then r[\"assumed_N_inv\"] else 4.0) * (if exists r[\"assumed_S_upload_mb\"] then r[\"assumed_S_upload_mb\"] else 32666.0) )) / 1073741824.0) * ((if exists r[\"assumed_P_idle_w\"] then r[\"assumed_P_idle_w\"] else 18.5) / ((if exists r[\"assumed_C_mem_gb\"] then r[\"assumed_C_mem_gb\"] else 5120.0) * 1000.0)),\n      EDB: (((if exists r[\"dynamodb_Events_Lsuccess\"] then r[\"dynamodb_Events_Lsuccess\"] else 0.0) + (if exists r[\"dynamodb_Users_Lsuccess\"] then r[\"dynamodb_Users_Lsuccess\"] else 0.0))) * (if exists r[\"assumed_P_active_w\"] then r[\"assumed_P_active_w\"] else 18.5) / (1000.0 * 3600.0 * 1000.0),\n      EAPI: (((if exists r[\"api_API_LAPI\"] then r[\"api_API_LAPI\"] else 0.0))) * (if exists r[\"assumed_P_Proc_w\"] then r[\"assumed_P_Proc_w\"] else 95.0) / (1000.0 * 3600.0 * 1000.0),\n      ERekog: (((if exists r[\"rekognition_Rekognition_Tresponse\"] then r[\"rekognition_Rekognition_Tresponse\"] else 0.0))) * (if exists r[\"assumed_P_GPU_w\"] then (if r[\"assumed_P_GPU_w\"] > 0.0 then r[\"assumed_P_GPU_w\"] else 70.0) else 70.0) / (1000.0 * 3600.0 * 1000.0)\n  }))\n  |> map(fn: (r) => ({\n      r with\n      ELambda: r.ELcompute + r.ELmemory + r.ELstorage + r.Enetwork,\n      ES3: r.ES3active + r.ES3idle\n  }))\n\nunion(tables: [\n  data |> map(fn: (r) => ({_time: r._time, _field: \"Lambda\", _value: r.ELambda})),\n  data |> map(fn: (r) => ({_time: r._time, _field: \"S3\", _value: r.ES3})),\n  data |> map(fn: (r) => ({_time: r._time, _field: \"DynamoDB\", _value: r.EDB})),\n  data |> map(fn: (r) => ({_time: r._time, _field: \"API Gateway\", _value: r.EAPI})),\n  data |> map(fn: (r) => ({_time: r._time, _field: \"Rekognition\", _value: r.ERekog}))\n])\n  |> sort(columns: [\"_field\"])",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Energy Breakdown (kWh)",
+      "type": "barchart"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "title": "Sustainability Dashboard",
+  "uid": "sustainability_dashboard",
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "timezone": "",
+  "version": 10
+}
